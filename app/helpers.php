@@ -54,3 +54,20 @@ function secretKTP($number){
 	$mask_number= substr($number, 0, 11).str_repeat('*', $len - 11);
     return $mask_number;
 }
+ 
+function provinsi($id){
+	$provinsi=\Laravolt\Indonesia\Models\Provinsi::where('id',$id)->value('name');
+	return $provinsi;
+}
+function kabupaten($id){
+	$kabupaten=\Laravolt\Indonesia\Models\Kabupaten::where('id',$id)->value('name');
+	return $kabupaten;
+}
+function kecamatan($id){
+	$kecamatan=\Laravolt\Indonesia\Models\Kecamatan::where('id',$id)->value('name');
+	return $kecamatan;
+}
+function kelurahan($id){
+	$kelurahan=\Laravolt\Indonesia\Models\Kelurahan::where('id',$id)->value('name');
+	return $kelurahan;
+}

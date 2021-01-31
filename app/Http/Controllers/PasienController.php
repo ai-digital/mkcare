@@ -6,29 +6,48 @@ use Illuminate\Http\Request;
 use App\Models\Pasien;
 use App\Models\Nkri;
 use App\Imports\PasiensImport;
-use Laravolt\Indonesia\Models\Province;
+use App\Exports\PasienExport;
+use Laravolt\Indonesia\Models\Kabupaten;
+use Laravolt\Indonesia\Models\Kecamatan;
+use Laravolt\Indonesia\Models\Kelurahan;
+use Laravolt\Indonesia\Models\Provinsi;
 use Validator;
 use DataTables;
 use Session;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
+use Auth;
 class PasienController extends Controller
 {
     //
     public function index(Request $request){
+        $provinces = Provinsi::pluck('name', 'id');
         
         if ($request->ajax()) {
             $data = Pasien::latest()->get();
+            
             return Datatables::of($data)
                     ->addIndexColumn()
-                    
+                     ->editColumn('provinsi',function($dt){
+                       $provinsi=$this->provinsi($dt->provinsi_id);
+                       return $provinsi;
+                     })
+                     ->editColumn('kabupaten',function($dt){
+                        $kabupaten=$this->kabupaten($dt->kabupaten_id);
+                        return $kabupaten;
+                      })
+                      ->editColumn('kecamatan',function($dt){
+                        $kecamatan=$this->kecamatan($dt->kecamatan_id);
+                        return $kecamatan;
+                      })
                     ->addColumn('action', function($row){
-                        $btn = '<a href="#ModalDetail" id="'.$row->nik.'|'.$row->no_mkcare.'|'.$row->no_jkn.'|'.ucfirst(strtolower($row->nama)).'|'.ucfirst(strtolower($row->tempat_lahir)).'|'.$row->tanggal_lahir.'|'.$row->jenis_kelamin.'|'.$row->alamat.'|'.ucfirst(strtolower($row->nomor_hp)).'|'.ucfirst(strtolower($row->nomor_wa)).'"  data-toggle="modal"  class="btn btn-sm btn-success detailPasien" alt="Lihat" title="Lihat"><i class="material-icons">visibility</i></a>';
+                        $btn = '<a href="#ModalDetail" id="'.$row->nik.'|'.$row->no_mkcare.'|'.$row->no_jkn.'|'.ucfirst(strtolower($row->nama)).'|'.ucfirst(strtolower($row->tempat_lahir)).'|'.$row->tanggal_lahir.'|'.$row->jenis_kelamin.'|'.$row->alamat.'|'.$this->provinsi($row->provinsi_id).'|'.$this->kabupaten($row->kabupaten_id).'|'.$this->kecamatan($row->kecamatan_id).'|'.$this->kelurahan($row->kelurahan_id).'|'.ucfirst(strtolower($row->nomor_hp)).'|'.ucfirst(strtolower($row->nomor_wa)).'"  data-toggle="modal"  class="btn btn-sm btn-success detailPasien" alt="Lihat" title="Lihat"><i class="material-icons">visibility</i></a>';
                         $btn = $btn. '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-warning btn-sm editPasien" alt="Edit" title="Edit"><i class="material-icons">edit</i></a>';
+                        $btn= $btn.' <a href="pasien/createPDF/'.$row->id.'" class="btn btn-info btn-sm" alt="cetak" title="cetak pdf" ><i class="material-icons">picture_as_pdf</i></a>';
+                
                         $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deletePasien" alt="Hapus" title="hapus"><i class="material-icons">delete</i></a>';
-
-                        return $btn;
+                           return $btn;
                     })
                     ->rawColumns(['action'])
                     ->make(true);
@@ -36,11 +55,33 @@ class PasienController extends Controller
                   
         }
        //dd($data);
-        return view('pages.pasien');
+        return view('pages.pasien', [
+            'provinces' => $provinces,
+        ]);
 
     }
+    
+    
+    function provinsi($id){
+        $provinsi=Provinsi::where('id',$id)->value('name');
+        return $provinsi;
+    }
+    function kabupaten($id){
+        $kabupaten=Kabupaten::where('id',$id)->value('name');
+        return $kabupaten;
+    }
+    function kecamatan($id){
+        $kecamatan=Kecamatan::where('id',$id)->value('name');
+        return $kecamatan;
+    }
+    function kelurahan($id){
+        $kelurahan=Kelurahan::where('id',$id)->value('name');
+        return $kelurahan;
+    }
+   
     public function store(Request $request)
     {
+       
         $rules=array('nik' =>  'required|digits:16|numeric', 
         
         'nama' => 'required|max:50', 
@@ -67,11 +108,15 @@ class PasienController extends Controller
                 'alamat'=> $request->alamat,
                 'provinsi_id'=> $request->provinsi_id,
                 'kabupaten_id'=> $request->kabupaten_id,
+                'kecamatan_id'=> $request->kecamatan_id,
+                'kelurahan_id'=> $request->kelurahan_id,
                 'tempat_lahir'=>$request->tempat_lahir,
                 'tanggal_lahir'=>$request->tanggal_lahir,
                 'jenis_kelamin'=>$request->jenis_kelamin,
                 'nomor_hp'=>$request->nomor_hp,
-                'nomor_wa'=>phone($request->nomor_wa,'id')->formatE164()
+                'nomor_wa'=>phone($request->nomor_wa,'id')->formatE164(),
+                'email'=> $request->email,
+                'id_user'=>Auth::user()->id
               ]);
             return response()->json(['success'=>'Data Berhasil ditambahkan']);
        }
@@ -85,7 +130,7 @@ class PasienController extends Controller
         $search = $request->input('search');
         if (!empty($search)){
         $pasien = Pasien::query()
-        ->where('nama','like',"%{$search}%")
+        ->where('nik','=',$search)
         ->orWhere('no_mkcare','=',$search)
         ->get();
 
@@ -99,20 +144,20 @@ class PasienController extends Controller
     	 
  
 	}
-    public function NIKSearch(Request $request)
+    public function nomkcareSearch(Request $request)
     {
     	$pasien = [];
         $results=array();
         if($request->has('term')){
             $search = $request->term;
             $pasien =Pasien::select("id","nama","nik","no_mkcare","no_jkn")
-            		->where('nik', 'LIKE', "%$search%")
+            		->where('no_mkcare', 'LIKE', "%$search%")
             		->take(6)->get();
         }
         foreach ($pasien as $query)
         {
             $results[] = ['id' => $query->id, 
-                         'value' => $query->nik,
+                         'value' => $query->no_mkcare,
                          'nama'=> $query->nama,
                          'nik'=> $query->nik,
                          'no_mkcare'=>$query->no_mkcare,
@@ -163,14 +208,43 @@ class PasienController extends Controller
 		return redirect('/pasien');
         //return back();
     }
-    public function createPDF() {
+    public function createPDF($id) {
         // retreive all records from db
-        $data = Pasien::all();
-        
+        $data = Pasien::find($id);
+        $data['provinsi']=$this->provinsi($data->provinsi_id);
+        $data['kabupaten']=$this->kabupaten($data->kabupaten_id);
+        $data['kecamatan']=$this->kecamatan($data->kecamatan_id);
+        $data['kelurahan']=$this->kelurahan($data->kelurahan_id);
+       
+         
        view()->share('pasien',$data);
-      $pdf = PDF::loadview('pages.pasien_pdf',$data);
+      $pdf = PDF::loadview('pages.pasien_detail_pdf',$data);
         // download PDF file with download method
        return $pdf->download('pasien_file.pdf');
       }
-  
+      public function export_excel()
+	{
+		return Excel::download(new PasienExport, 'pasien.xlsx');
+	}
+      public function city(Request $request)
+      {
+          $cities = Kabupaten::where('province_id', $request->get('id'))
+              ->pluck('name', 'id');
+      
+          return response()->json($cities);
+      }
+      public function district(Request $request)
+      {
+          $cities = Kecamatan::where('city_id', $request->get('id'))
+              ->pluck('name', 'id');
+      
+          return response()->json($cities);
+      }
+      public function village(Request $request)
+      {
+          $cities = Kelurahan::where('district_id', $request->get('id'))
+              ->pluck('name', 'id');
+      
+          return response()->json($cities);
+      }
 }

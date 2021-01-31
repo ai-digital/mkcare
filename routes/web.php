@@ -26,8 +26,8 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Auth::routes();
 
 Route::get('/home', 'App\Http\Controllers\HomeController@index')->name('home')->middleware('auth');
-Route::get('pasien_pdf', 'App\Http\Controllers\PasienController@createPDF')->name('createPDF');
-
+Route::get('/pasien/createPDF/{id?}', 'App\Http\Controllers\PasienController@createPDF')->name('createPDF');
+Route::get('/pasien/export_excel', 'App\Http\Controllers\PasienController@export_excel')->name('export_excel');
 Route::group(['middleware' => 'auth'], function () {
 
 	Route::resource('pasien',PasienController::class);
@@ -38,7 +38,10 @@ Route::group(['middleware' => 'auth'], function () {
 	})->name('rekam_isi');
 	Route::get('/rekam/detail/{id?}', 'App\Http\Controllers\RekamController@show')->name('rekam_show'); 
 	Route::get('/showrekam/{id?}', 'App\Http\Controllers\RekamController@showrekam')->name('rekam_detail_pasien'); 
-	Route::get('/nik_cari', 'App\Http\Controllers\PasienController@NIKSearch')->name('nik_cari');
+	Route::get('/nomkcare_cari', 'App\Http\Controllers\PasienController@nomkcareSearch')->name('nomkcare_cari');
+	Route::post('prov', 'App\Http\Controllers\PasienController@city')->name('pasien.prov');
+	Route::post('kab', 'App\Http\Controllers\PasienController@district')->name('pasien.kab');
+	Route::post('kec', 'App\Http\Controllers\PasienController@village')->name('pasien.kec');
 	Route::delete('/rekam/delete/{id}', 'App\Http\Controllers\RekamController@destroy')->name('delete');
 	//Route::get('file_import', [PasienController::class, 'index'])->name('file_import');
 	Route::post('file_import','App\Http\Controllers\PasienController@fileimport')->name('file_import'); 

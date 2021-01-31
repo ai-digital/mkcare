@@ -14,9 +14,10 @@ class PasiensTableSeeder extends Seeder
      */
     public function run()
     {
- 
+        
     	$faker = Faker::create('id_ID');
- 
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('pasiens')->truncate();
     	for($i = 1; $i <= 100; $i++){
             $jk = $faker->randomElement(['pria', 'wanita']);
 			if ($jk == "pria") {
@@ -38,11 +39,14 @@ class PasiensTableSeeder extends Seeder
                 'jenis_kelamin'=>$jk,
                 'nomor_wa' => $faker->phoneNumber,
                 'nomor_hp'=> $faker->phoneNumber,
+                'email'=>$faker->email,
+                'id_user'=>0,
                 'created_at' => now(),
                 'updated_at' => now()
     		]);
  
-    	}
+        }
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
  
     }
 }

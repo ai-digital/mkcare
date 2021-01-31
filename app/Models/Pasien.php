@@ -40,20 +40,6 @@ class Pasien extends Model
             return $data;
         }
     }
-    public function kabupaten()
-    {
-        return $this->belongsTo('App\Models\Nkri','id','kabupaten_id');
-    }
-
-    public function kecamatan()
-    {
-        return $this->belongsTo('App\Models\Nkri','id','kecamatan_id');
-    }
-
-    public function kelurahan()
-    {
-        return $this->belongsTo('App\Models\Nkri','id','kelurahan_id');
-    }
-
+     
 
 }

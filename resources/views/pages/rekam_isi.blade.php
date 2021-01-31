@@ -40,6 +40,19 @@
                     </div>
                 </div>
                 <div class="row">
+                  <label class="col-sm-2 col-form-label">No MK Care</label>
+                  <div class="col-sm-4">
+                    <div class="form-group{{ $errors->has('no_mkcare') ? ' has-danger' : '' }}">
+                      <input class="form-control{{ $errors->has('no_mkcare') ? ' is-invalid' : '' }}" name="no_mkcare" id="no_mkcare"  placeholder="{{ __('No MKCare') }}" value="{{ old('no_mkcare') }}" required />
+                      @if ($errors->has('no_mkcare'))
+                        <span id="no_mkcare-error" class="error text-danger" for="no_mkcare">{{ $errors->first('no_mkcare') }}</span>
+                      @endif
+                    </div>
+                    <div class="sm-4 col-form-label">
+                      <span class="tim-note"><small> <label class="col-form-label">SIlahkan Masukkan No MKCare, Detail Pasien akan otomatis tersedia</label></small> </span></div>
+                    </div>
+                  </div>
+                <div class="row">
                   <label class="col-sm-2 col-form-label">NIK</label>
                   <div class="col-sm-4">
                     <div class="form-group{{ $errors->has('nik') ? ' has-danger' : '' }}">
@@ -51,24 +64,13 @@
                     </div>
                     
                   </div>
-                  <div class="sm-4 col-form-label">
-                  <span class="tim-note"><small> <label class="col-form-label">SIlahkan Masukkan NIK pasien saja, Detail Pasien akan otomatis tersedia</label></small> </span></div>
-                </div>
-                <div class="row">
-                  <label class="col-sm-2 col-form-label">No MK Care</label>
-                  <div class="col-sm-4">
-                    <div class="form-group{{ $errors->has('no_mkcare') ? ' has-danger' : '' }}">
-                      <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="no_mkcare" id="no_mkcare"  placeholder="{{ __('No MKCare') }}" value="{{ old('email') }}" required />
-                      @if ($errors->has('no_jkn'))
-                        <span id="no_mkcare-error" class="error text-danger" for="no_mkcare">{{ $errors->first('no_mkcare') }}</span>
-                      @endif
-                    </div>
-                  </div>
+                  
+                
                 
                     <label class="col-sm-2 col-form-label">No JKN</label>
                     <div class="col-sm-4">
                       <div class="form-group{{ $errors->has('no_jkn') ? ' has-danger' : '' }}">
-                        <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="no_jkn" id="no_jkn"  placeholder="{{ __('No JKN') }}" value="{{ old('email') }}" required />
+                        <input class="form-control{{ $errors->has('no_jkn') ? ' is-invalid' : '' }}" name="no_jkn" id="no_jkn"  placeholder="{{ __('No JKN') }}" value="{{ old('no_jkn') }}" required />
                         @if ($errors->has('no_jkn'))
                           <span id="no_jkn-error" class="error text-danger" for="no_jkn">{{ $errors->first('no_jkn') }}</span>
                         @endif
@@ -79,7 +81,7 @@
                 <label class="col-sm-2 col-form-label">Nama</label>
                 <div class="col-sm-7">
                   <div class="form-group{{ $errors->has('nama') ? ' has-danger' : '' }}">
-                    <input class="form-control{{ $errors->has('nama') ? ' is-invalid' : '' }}" name="nama" id="nama"  placeholder="{{ __('Nama') }}" value="{{ old('email') }}" required />
+                    <input class="form-control{{ $errors->has('nama') ? ' is-invalid' : '' }}" name="nama" id="nama"  placeholder="{{ __('Nama') }}" value="{{ old('nama') }}" required />
                     @if ($errors->has('nama'))
                       <span id="nama-error" class="error text-danger" for="nama">{{ $errors->first('nama') }}</span>
                     @endif
@@ -151,10 +153,10 @@
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
    <script type="text/javascript">
-      $('#nik').autocomplete({
-          placeholder: 'Masukkan NIK',
+      $('#no_mkcare').autocomplete({
+          placeholder: 'Masukkan No MKCare',
          
-              source: "{{ route('nik_cari') }}",
+              source: "{{ route('nomkcare_cari') }}",
               minlength:3,
              
               autoFocus:true,

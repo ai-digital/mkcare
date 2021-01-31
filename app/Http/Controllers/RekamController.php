@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str; 
 use DB;
 use Carbon\Carbon;
-
+use Auth;
 class RekamController extends Controller
 {
     //
@@ -138,7 +138,8 @@ class RekamController extends Controller
                 'keluhan'=> $request->keluhan,
                 'tindakan'=> $request->tindakan,
                 'diagnosa' => $request->diagnosa,
-                'petugas' => $request->petugas
+                'petugas' => $request->petugas,
+                'id_user'=>Auth::user()->id
           
               ]);
                

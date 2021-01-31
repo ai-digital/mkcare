@@ -17,9 +17,10 @@ class CreateRekamsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('id_pasien');
             $table->date('tgl_rekam');
-            $table->text('keluhan');
-            $table->text('tindakan');
-            $table->text('petugas');
+            $table->text('keluhan')->nullable();
+            $table->text('diagnosa')->nullable();
+            $table->text('tindakan')->nullable();
+            $table->text('petugas')->nullable();
             $table->unsignedBigInteger('id_user');
             $table->timestamps();
 

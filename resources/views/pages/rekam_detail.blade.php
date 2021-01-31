@@ -130,6 +130,11 @@
                         <input type="date" class="form-control" id="tgl_rekam" name="tgl_rekam" value="<?php echo date('Y-m-d'); ?>">
                       </div>
                   </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="name" class="control-label">Nomor MKCare</label>
+                        <input type="text" class="form-control" id="no_mkcare" name="no_mkcare"  value="{{ $rekam->no_mkcare}}" readonly>
+                      </div>
                    <div class="form-row">
                    <input type="hidden" name="pasien_id" id="pasien_id" value="{{ $rekam->id }}">  
                    <div class="form-group col-md-12">
@@ -137,11 +142,7 @@
                      <input type="text" class="form-control" id="nik" name="nik" placeholder="Masukkan NIK" value="{{ $rekam->nik }}" maxlength="16" readonly>
                     </div>
                    </div>
-                    <div class="form-row">
-                    <div class="form-group col-md-6">
-                      <label for="name" class="control-label">Nomor MKCare</label>
-                        <input type="text" class="form-control" id="no_mkcare" name="no_mkcare"  value="{{ $rekam->no_mkcare}}" readonly>
-                      </div>
+                   
                   
                   <div class="form-group col-md-6" >
                     <label for="name" class="control-label">Nomor JKN</label>

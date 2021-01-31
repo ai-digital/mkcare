@@ -29,7 +29,7 @@
     <div class="col-lg-7 col-md-8">
       <div class="form-group">
         <label for="cari" class="text-white text-center">Pencarian </label>
-        <input name="search" id="search" class="form-control" placeholder="Cari nama peserta / No MK Care" required/>
+        <input name="search" id="search" class="form-control" placeholder="Masukkan NIK peserta / No MK Care" required/>
       </div>
       <div class="form-group"><button id="btnCari" class="btn btn-warning" type="submit"> Cari</button></div>
     </div>

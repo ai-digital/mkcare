@@ -38,37 +38,19 @@
 </form>
 <div class="row justify-content-center">
     @if($pasien->isNotEmpty())
-  <div class="col-lg-10 col-md-8">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-          <tr>
-            <td>NIK</td>
-            <td>No MKCare</td>
-            <td>Nama</td>
-            <td>Jenis Kelamin</td>
-            <td>Usia</td>
-            <td>Alamat</td>
-            <td>No HP</td>
-          </tr></thead>
-          <tbody>
-          @foreach ($pasien as $pasiens)
-          <tr>
-            <td>{{ secretKTP($pasiens->nik) }}</td>
-            <td>{{ $pasiens->no_mkcare }}</td>
-            <td>{{ $pasiens->nama }}</td>
-            
-            <td>{{ $pasiens->jenis_kelamin }}</td>
-            <td>{{ usia($pasiens->tanggal_lahir) }} tahun </td>
-            <td>{{ secretName($pasiens->alamat) }}</td>
-            <td>{{ secretKTP($pasiens->nomor_hp) }}</td>
-          </tr>
-          @endforeach
-          </tbody>
-        </table>
-          
+    @foreach ($pasien as $pasiens)
+    <div class="col-lg-10 col-md-8">
+      <div class="alert alert-succes alert-with-icon alert-dismiss" data-notify="container">
+        <i class="material-icons" data-notify="icon">warning</i>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <i class="material-icons">close</i>
+        </button>
+        <span data-notify="message">Selamat <strong>{{ $pasiens->nama }}</strong>, usia {{ usia($pasiens->tanggal_lahir) }} tahun, NIK : {{ secretKTP($pasiens->nik) }}, sudah terdaftar pada layanan kami<br>
+        no mk care : {{ secretName($pasiens->no_mkcare) }} </span>
       </div>
-  </div>
+      </div>
+      @endforeach
+      
 @else 
 <div class="col-lg-10 col-md-8">
   <div class="alert alert-danger alert-with-icon alert-dismiss" data-notify="container">

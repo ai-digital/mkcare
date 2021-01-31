@@ -13,11 +13,17 @@
             <p class="card-category"></p>
           </div>
           <div class="card-body">
-            <a class="btn btn-primary" href="javascript:void(0)" id="createNew"> Tambah Data</a>
-            <a class="btn btn-info mr-5" href="javascript:void(0)" id="importPasien">
+            <a class="btn btn-primary mr-5" href="javascript:void(0)" id="createNew"><i class="material-icons">
+             add
+            </i> Tambah Data</a>
+            <a class="btn btn-info mr-5" href="javascript:void(0)" id="importPasien"><i class="material-icons">
+              unarchive
+            </i>
               IMPORT EXCEL
             </a>
-            <a class="btn btn-warning" href="{{ URL::to('pasien_pdf') }}">Export to PDF</a>
+            <a class="btn btn-warning  mr-5" href="{{ URL::to('/pasien/export_excel') }}"><i class="material-icons">
+              save_alt
+            </i>Export to Excel</a>
             <div class="alert alert-danger print-error-msg" style="display:none">
               <ul></ul>
           </div>
@@ -51,6 +57,15 @@
                   <th>
                    Tanggal Lahir
                   </th>
+                  <th>
+                    Provinsi
+                   </th>
+                   <th>
+                    Kabupaten
+                   </th>
+                   <th>
+                   Kecamatan
+                   </th>
                 <th>Action</th>
                 
                 </thead>
@@ -76,7 +91,7 @@
          
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="material-icons">close</i> Tutup</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal"><i class="material-icons">close</i> Tutup</button> 
           </div>
       </div>
     </div>
@@ -122,7 +137,7 @@
                   </div>
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      <label for="tempat_lahir" class=" control-label">Tempat Lahir</label>
+                      <label for="tempat_lahir" class="control-label">Tempat Lahir</label>
                       <input type="text" class="form-control" id="tempat_lahir" name="tempat_lahir" placeholder="Tempat Lahir" value="" maxlength="50" required>
                     </div>
                     <div class="form-group col-md-6">
@@ -147,9 +162,44 @@
                         </div>
                     </div>
                     <div class="form-row">
+                      <div class="form-group col-md-6">
+                      <label for="name" class="control-label">Provinsi</label>
+                        <select name="provinsi_id" id="province" class="form-control">
+                              <option value="">== Pilih Provinsi ==</option>
+                              @foreach ($provinces as $id => $name)
+                                  <option value="{{ $id }}">{{ $name }}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                 
+                  <div class="form-group col-md-6">
+                    <label for="name" class="control-label">Kabupaten/Kota</label>
+                         <select name="kabupaten_id" id="city" class="form-control">
+                            <option value="">== Pilih Kabupaten ==</option>
+                        </select>
+                    </div>
+                   </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                  <label for="name" class="control-label">Kecamatan</label>
+                      <select name="kecamatan_id" id="district" class="form-control">
+                          <option value="">== Pilih Kecamatan ==</option>
+                      </select>
+                  </div>
+                          
+                <div class="form-group col-md-6">
+                <label for="name" class="control-label">Kelurahan</label>
+        
+               
+                    <select name="kelurahan_id" id="village" class="form-control">
+                        <option value="">== Pilih Kelurahan ==</option>
+                    </select>
+                </div>
+            </div>
+                    <div class="form-row">
                     <div class="form-group col-md-12">
                       <label for="nomor_wa" class="control-label">Nomor WA</label>
-                          <input type="number" class="form-control" id="nomor_wa" name="nomor_wa" placeholder="081xxxxxxx" value="" maxlength="16"/>
+                          <input type="text" class="form-control" id="nomor_wa" name="nomor_wa" placeholder="081xxxxxxx" value="" maxlength="16"/>
                           <span id="spnPhoneStatus"></span>
                         </div>
 
@@ -250,10 +300,54 @@
             {data: 'nama', name: 'nama'},
             {data: 'jenis_kelamin', name: 'jenis_kelamin'},            
             {data: 'tanggal_lahir', name: 'tanggal_kahir'},
+            {data: 'provinsi', name: 'provinsi'},
+            {data: 'kabupaten', name: 'kabupaten'},
+            {data: 'kecamatan', name: 'kecamatan'},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ]
     });
+    $('#province').on('change', function () {
+        $.ajax({
+            url: '{{ route('pasien.prov') }}',
+            method: 'POST',
+            data: {id: $(this).val()},
+            success: function (response) {
+                $('#city').empty();
 
+                $.each(response, function (id, name) {
+                    $('#city').append(new Option(name, id))
+                })
+            }
+        })
+    });
+    $('#city').on('change', function () {
+        $.ajax({
+            url: '{{ route('pasien.kab') }}',
+            method: 'POST',
+            data: {id: $(this).val()},
+            success: function (response) {
+                $('#district').empty();
+
+                $.each(response, function (id, name) {
+                    $('#district').append(new Option(name, id))
+                })
+            }
+        })
+    }); 
+    $('#district').on('change', function () {
+        $.ajax({
+            url: '{{ route('pasien.kec') }}',
+            method: 'POST',
+            data: {id: $(this).val()},
+            success: function (response) {
+                $('#village').empty();
+
+                $.each(response, function (id, name) {
+                    $('#village').append(new Option(name, id))
+                })
+            }
+        })
+    });
 $('#createNew').click(function () {
   $('#saveBtn').val("create-pasien");
   $('#pasien_id').val('');
@@ -275,7 +369,7 @@ $('body').on('click','.detailPasien', function(){
        
        var datanya = DataPasien.split("|");
       
-       $("#IsiModal").html('<table width="100%" style="font-size:14px"><tr><td width="150">NIK</td><td width="10">:</td><td>'+datanya[0]+'</td></tr><tr><tr><td>No MKCare</td><td>:</td><td>'+datanya[1]+'</td></tr><tr><td>No JKN</td><td>:</td><td>'+datanya[2]+'</td></tr><tr><td>Nama Lengkap</td><td>:</td><td>'+datanya[3]+'</td></tr><tr><td>Tempat, Tanggal  Lahir</td><td>:</td><td>'+datanya[4]+', '+datanya[5]+'</td></tr><tr><td>Jenis Kelamin</td><td>:</td><td>'+datanya[6]+'</td></tr><tr><td>Alamat</td><td>:</td><td>'+datanya[7]+'</td></tr><tr><td>Nomor HP</td><td>:</td><td>'+datanya[8]+'</td></tr><tr><td>Nomor WA</td><td>:</td><td>'+datanya[9]+'</td></tr></table>');
+       $("#IsiModal").html('<table width="100%" style="font-size:14px"><tr><td width="150">NIK</td><td width="10">:</td><td>'+datanya[0]+'</td></tr><tr><tr><td>No MKCare</td><td>:</td><td>'+datanya[1]+'</td></tr><tr><td>No JKN</td><td>:</td><td>'+datanya[2]+'</td></tr><tr><td>Nama Lengkap</td><td>:</td><td>'+datanya[3]+'</td></tr><tr><td>Tempat, Tanggal  Lahir</td><td>:</td><td>'+datanya[4]+', '+datanya[5]+'</td></tr><tr><td>Jenis Kelamin</td><td>:</td><td>'+datanya[6]+'</td></tr><tr><td>Alamat</td><td>:</td><td>'+datanya[7]+'</td></tr><tr><td>Provinsi</td><td>:</td><td>'+datanya[8]+'</td></tr><tr><td>Kabupaten</td><td>:</td><td>'+datanya[9]+'</td></tr><tr><td>Kecamatan</td><td>:</td><td>'+datanya[10]+'</td></tr><tr><td>Kelurahan</td><td>:</td><td>'+datanya[11]+'</td></tr><tr><td>Nomor HP</td><td>:</td><td>'+datanya[12]+'</td></tr><tr><td>Nomor WA</td><td>:</td><td>'+datanya[13]+'</td></tr></table>');
        $('#ModalDetail').modal('show');
        });
 
@@ -291,11 +385,16 @@ $('body').on('click', '.editPasien', function () {
           $('#no_jkn').val(data.no_jkn);
           $('#nama').val(data.nama);
           $('#alamat').val(data.alamat);
+          $('#provinsi_id').val(data.provinsi_id);
+          $('#kabupaten_id').val(data.kabupaten_id);
+          $('#kecamatan_id').val(data.kecamatan_id);
+          $('#kelurahan_id').val(data.kelurahan_id);
           $('#tempat_lahir').val(data.tempat_lahir);
           $('#tanggal_lahir').val(data.tanggal_lahir);
           $('#jenis_kelamin').val(data.jenis_kelamin);
           $('#nomor_wa').val(data.nomor_wa);
           $('#nomor_hp').val(data.nomor_hp);
+          $('#email').val(data.email);
       })
    });
 $('#saveBtn').click(function (e) {
@@ -311,7 +410,7 @@ $('#saveBtn').click(function (e) {
           dataType: 'json',
           complete: function(response) {
      
-              $('#pasienForm').trigger("reset");
+              //$('#pasienForm').trigger("reset");
               
               table.draw();
               if($.isEmptyObject(response.responseJSON.error)){
@@ -366,16 +465,7 @@ $('body').on('click', '.deletePasien', function () {
      }
      );}
  });
- function validatePhone(txtPhone) {
-    var a = document.getElementById(txtPhone).value;
-    var filter = /^((\+[1-9]{1,4}[ \-]*)|(\([0-9]{2,3}\)[ \-]*)|([0-9]{2,4})[ \-]*)*?[0-9]{3,4}?[ \-]*[0-9]{3,4}?$/;
-    if (filter.test(a)) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
+  
 $('#nomor_wa').blur(function(e) {
         if (validatePhone('txtPhone')) {
             $('#spnPhoneStatus').html('Valid');
