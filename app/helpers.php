@@ -1,5 +1,10 @@
 <?php
-  
+
+use App\Models\Province;
+use App\Models\District;
+use App\Models\Regency;
+use App\Models\Village;
+
 function changeDateFormate($date,$date_format){
     return \Carbon\Carbon::createFromFormat('Y-m-d', $date)->format($date_format);    
 }
@@ -55,19 +60,22 @@ function secretKTP($number){
     return $mask_number;
 }
  
-function provinsi($id){
-	$provinsi=\Laravolt\Indonesia\Models\Provinsi::where('id',$id)->value('name');
-	return $provinsi;
-}
-function kabupaten($id){
-	$kabupaten=\Laravolt\Indonesia\Models\Kabupaten::where('id',$id)->value('name');
-	return $kabupaten;
-}
-function kecamatan($id){
-	$kecamatan=\Laravolt\Indonesia\Models\Kecamatan::where('id',$id)->value('name');
-	return $kecamatan;
-}
-function kelurahan($id){
-	$kelurahan=\Laravolt\Indonesia\Models\Kelurahan::where('id',$id)->value('name');
-	return $kelurahan;
+function outnama($id, $tabel, $kolom)
+{
+    if($tabel == 'provinsi'){
+        $hasil = Province::find($id);
+    }elseif($tabel == 'kota'){
+        $hasil = Regency::find($id);
+    }elseif($tabel == 'camat'){
+        $hasil = District::find($id);
+    }elseif($tabel == 'lurah'){
+        $hasil = Village::find($id);
+    }
+
+    if(!is_null($hasil)){
+        return $hasil[$kolom];   
+    }else{
+        return '';
+    }
+
 }

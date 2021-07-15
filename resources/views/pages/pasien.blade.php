@@ -164,17 +164,17 @@
                     <div class="form-row">
                       <div class="form-group col-md-6">
                       <label for="name" class="control-label">Provinsi</label>
-                        <select name="provinsi_id" id="province" class="form-control">
+                        <select name="provinsi_id" id="provinsi" class="form-control">
                               <option value="">== Pilih Provinsi ==</option>
                               @foreach ($provinces as $id => $name)
-                                  <option value="{{ $id }}">{{ $name }}</option>
+                                  <option value="{{ $name->id }}">{{ $name->name }}</option>
                               @endforeach
                           </select>
                       </div>
                  
                   <div class="form-group col-md-6">
                     <label for="name" class="control-label">Kabupaten/Kota</label>
-                         <select name="kabupaten_id" id="city" class="form-control">
+                         <select name="kabupaten_id" id="kota" class="form-control">
                             <option value="">== Pilih Kabupaten ==</option>
                         </select>
                     </div>
@@ -182,7 +182,7 @@
                 <div class="form-row">
                   <div class="form-group col-md-6">
                   <label for="name" class="control-label">Kecamatan</label>
-                      <select name="kecamatan_id" id="district" class="form-control">
+                      <select name="kecamatan_id" id="kecamatan" class="form-control">
                           <option value="">== Pilih Kecamatan ==</option>
                       </select>
                   </div>
@@ -191,7 +191,7 @@
                 <label for="name" class="control-label">Kelurahan</label>
         
                
-                    <select name="kelurahan_id" id="village" class="form-control">
+                    <select name="kelurahan_id" id="kelurahan" class="form-control">
                         <option value="">== Pilih Kelurahan ==</option>
                     </select>
                 </div>
@@ -300,54 +300,13 @@
             {data: 'nama', name: 'nama'},
             {data: 'jenis_kelamin', name: 'jenis_kelamin'},            
             {data: 'tanggal_lahir', name: 'tanggal_kahir'},
-            {data: 'provinsi', name: 'provinsi'},
-            {data: 'kabupaten', name: 'kabupaten'},
-            {data: 'kecamatan', name: 'kecamatan'},
+            {data: 'provinsi_id', name: 'provinsi_id'},
+            {data: 'kabupaten_id', name: 'kabupaten_id'},
+            {data: 'kecamatan_id', name: 'kecamatan_id'},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ]
     });
-    $('#province').on('change', function () {
-        $.ajax({
-            url: '{{ route('pasien.prov') }}',
-            method: 'POST',
-            data: {id: $(this).val()},
-            success: function (response) {
-                $('#city').empty();
-
-                $.each(response, function (id, name) {
-                    $('#city').append(new Option(name, id))
-                })
-            }
-        })
-    });
-    $('#city').on('change', function () {
-        $.ajax({
-            url: '{{ route('pasien.kab') }}',
-            method: 'POST',
-            data: {id: $(this).val()},
-            success: function (response) {
-                $('#district').empty();
-
-                $.each(response, function (id, name) {
-                    $('#district').append(new Option(name, id))
-                })
-            }
-        })
-    }); 
-    $('#district').on('change', function () {
-        $.ajax({
-            url: '{{ route('pasien.kec') }}',
-            method: 'POST',
-            data: {id: $(this).val()},
-            success: function (response) {
-                $('#village').empty();
-
-                $.each(response, function (id, name) {
-                    $('#village').append(new Option(name, id))
-                })
-            }
-        })
-    });
+   
 $('#createNew').click(function () {
   $('#saveBtn').val("create-pasien");
   $('#pasien_id').val('');
@@ -363,6 +322,40 @@ $('#importPasien').click(function () {
   $('#importExcel').modal('show');
 
 });
+    $("#provinsi").change(function () {
+              var idprovinsi = $("#provinsi").val();
+              $.ajax({
+                  url: "{{url('wilayah/listkabupaten')}}",
+                  data: "kodeprovinsi=" + idprovinsi,
+                  cache: false,
+                  success: function (msg) {
+                      $("#kota").html(msg);
+                  }
+              });
+          });
+          $("#kota").change(function () {
+              var idkota = $("#kota").val();
+              $.ajax({
+                  url: "{{url('wilayah/listkecamatan')}}",
+                  data: "kodekota=" + idkota,
+                  cache: false,
+                  success: function (msg) {
+                      $("#kecamatan").html(msg);
+                  }
+              });
+          });
+
+          $("#kecamatan").change(function () {
+              var idcamat = $("#kecamatan").val();
+              $.ajax({
+                  url: "{{url('wilayah/listkelurahan')}}",
+                  data: "kodecamat=" + idcamat,
+                  cache: false,
+                  success: function (msg) {
+                      $("#kelurahan").html(msg);
+                  }
+              });
+          });
 $('body').on('click','.detailPasien', function(){
        
        var DataPasien= this.id;
@@ -466,16 +459,8 @@ $('body').on('click', '.deletePasien', function () {
      );}
  });
   
-$('#nomor_wa').blur(function(e) {
-        if (validatePhone('txtPhone')) {
-            $('#spnPhoneStatus').html('Valid');
-            $('#spnPhoneStatus').css('color', 'green');
-        }
-        else {
-            $('#spnPhoneStatus').html('Invalid');
-            $('#spnPhoneStatus').css('color', 'red');
-        }
-    });
+  
+
   });
 
    

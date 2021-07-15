@@ -39,14 +39,16 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/rekam/detail/{id?}', 'App\Http\Controllers\RekamController@show')->name('rekam_show'); 
 	Route::get('/showrekam/{id?}', 'App\Http\Controllers\RekamController@showrekam')->name('rekam_detail_pasien'); 
 	Route::get('/nomkcare_cari', 'App\Http\Controllers\PasienController@nomkcareSearch')->name('nomkcare_cari');
-	Route::post('prov', 'App\Http\Controllers\PasienController@city')->name('pasien.prov');
-	Route::post('kab', 'App\Http\Controllers\PasienController@district')->name('pasien.kab');
-	Route::post('kec', 'App\Http\Controllers\PasienController@village')->name('pasien.kec');
+	
 	Route::delete('/rekam/delete/{id}', 'App\Http\Controllers\RekamController@destroy')->name('delete');
 	//Route::get('file_import', [PasienController::class, 'index'])->name('file_import');
 	Route::post('file_import','App\Http\Controllers\PasienController@fileimport')->name('file_import'); 
 	
 	Route::resource('user', UserController::class);
+	Route::get('wilayah/listkecamatan', array('uses' => 'App\Http\Controllers\WilayahController@listkecamatan'));
+	Route::get('wilayah/listkelurahan', array('uses' => 'App\Http\Controllers\WilayahController@listkelurahan'));
+	Route::get('wilayah/listkabupaten', array('uses' => 'App\Http\Controllers\WilayahController@listkabupaten'));
+
 	 
 });
 

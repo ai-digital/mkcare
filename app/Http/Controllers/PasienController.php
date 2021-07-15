@@ -4,13 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pasien;
-use App\Models\Nkri;
+use App\Models\Province;
 use App\Imports\PasiensImport;
 use App\Exports\PasienExport;
-use Laravolt\Indonesia\Models\Kabupaten;
-use Laravolt\Indonesia\Models\Kecamatan;
-use Laravolt\Indonesia\Models\Kelurahan;
-use Laravolt\Indonesia\Models\Provinsi;
+ 
 use Validator;
 use DataTables;
 use Session;
@@ -18,31 +15,32 @@ use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use Auth;
+use GuzzleHttp\Client;
+
 class PasienController extends Controller
 {
     //
     public function index(Request $request){
-        $provinces = Provinsi::pluck('name', 'id');
-        
+       
+       
+        $provinces=Province::get();
         if ($request->ajax()) {
             $data = Pasien::latest()->get();
-            
+           
             return Datatables::of($data)
                     ->addIndexColumn()
-                     ->editColumn('provinsi',function($dt){
-                       $provinsi=$this->provinsi($dt->provinsi_id);
-                       return $provinsi;
+                     ->editColumn('provinsi_id',function($dt){
+                        return outnama($dt['provinsi_id'], 'provinsi', 'name');
                      })
-                     ->editColumn('kabupaten',function($dt){
-                        $kabupaten=$this->kabupaten($dt->kabupaten_id);
-                        return $kabupaten;
+                     ->editColumn('kabupaten_id',function($dt){
+                        return outnama($dt['kabupaten_id'], 'kota', 'name');
+                        
                       })
-                      ->editColumn('kecamatan',function($dt){
-                        $kecamatan=$this->kecamatan($dt->kecamatan_id);
-                        return $kecamatan;
+                      ->editColumn('kecamatan_id',function($dt){
+                        return outnama($dt['kecamatan_id'], 'camat', 'name');
                       })
                     ->addColumn('action', function($row){
-                        $btn = '<a href="#ModalDetail" id="'.$row->nik.'|'.$row->no_mkcare.'|'.$row->no_jkn.'|'.ucfirst(strtolower($row->nama)).'|'.ucfirst(strtolower($row->tempat_lahir)).'|'.$row->tanggal_lahir.'|'.$row->jenis_kelamin.'|'.$row->alamat.'|'.$this->provinsi($row->provinsi_id).'|'.$this->kabupaten($row->kabupaten_id).'|'.$this->kecamatan($row->kecamatan_id).'|'.$this->kelurahan($row->kelurahan_id).'|'.ucfirst(strtolower($row->nomor_hp)).'|'.ucfirst(strtolower($row->nomor_wa)).'"  data-toggle="modal"  class="btn btn-sm btn-success detailPasien" alt="Lihat" title="Lihat"><i class="material-icons">visibility</i></a>';
+                        $btn = '<a href="#ModalDetail" id="'.$row->nik.'"  data-toggle="modal"  class="btn btn-sm btn-success detailPasien" alt="Lihat" title="Lihat"><i class="material-icons">visibility</i></a>';
                         $btn = $btn. '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-warning btn-sm editPasien" alt="Edit" title="Edit"><i class="material-icons">edit</i></a>';
                         $btn= $btn.' <a href="pasien/createPDF/'.$row->id.'" class="btn btn-info btn-sm" alt="cetak" title="cetak pdf" ><i class="material-icons">picture_as_pdf</i></a>';
                 
@@ -55,35 +53,31 @@ class PasienController extends Controller
                   
         }
        //dd($data);
-        return view('pages.pasien', [
-            'provinces' => $provinces,
-        ]);
+        return view('pages.pasien',['provinces' => $provinces]);
 
     }
     
     
-    function provinsi($id){
-        $provinsi=Provinsi::where('id',$id)->value('name');
-        return $provinsi;
+      public function cek_nik(Request $request)
+    {
+        $nik = $request->input('nik');
+        $pasien = Pasien::where('nik',$nik)->count();
+        if($pasien > 0){
+            $respon = array('status' => 1, 'error' => 'NIK yang diinputkan sudah ada pada database', 'program' => '');
+        } 
+        
+
+        return $respon;
     }
-    function kabupaten($id){
-        $kabupaten=Kabupaten::where('id',$id)->value('name');
-        return $kabupaten;
-    }
-    function kecamatan($id){
-        $kecamatan=Kecamatan::where('id',$id)->value('name');
-        return $kecamatan;
-    }
-    function kelurahan($id){
-        $kelurahan=Kelurahan::where('id',$id)->value('name');
-        return $kelurahan;
-    }
-   
     public function store(Request $request)
     {
-       
-        $rules=array('nik' =>  'required|digits:16|numeric', 
+        $nik_rule = 'required|digits:16|unique:pasiens,nik';
+        if($request->pasien_id<>'') {
+          $nik_rule = 'required|digits:16|unique:pasiens,nik,'. $request->pasien_id;
+        }
+         
         
+         $rules=array('nik' =>  $nik_rule,
         'nama' => 'required|max:50', 
         'tempat_lahir'=>'required|max:50',
         'tanggal_lahir'=>'required|date',
@@ -118,12 +112,17 @@ class PasienController extends Controller
                 'email'=> $request->email,
                 'id_user'=>Auth::user()->id
               ]);
-            return response()->json(['success'=>'Data Berhasil ditambahkan']);
+            //return response()->json(['success'=>'Data Berhasil ditambahkan']);
+            
+            Session::flash('sukses','Data Pasien Berhasil Diimport!');
+            return redirect('/pasien','refresh');
        }
         
             
      
     }
+
+    
     public function cari(Request $request)
 	{
        $pasien = null;
@@ -226,25 +225,5 @@ class PasienController extends Controller
 	{
 		return Excel::download(new PasienExport, 'pasien.xlsx');
 	}
-      public function city(Request $request)
-      {
-          $cities = Kabupaten::where('province_id', $request->get('id'))
-              ->pluck('name', 'id');
-      
-          return response()->json($cities);
-      }
-      public function district(Request $request)
-      {
-          $cities = Kecamatan::where('city_id', $request->get('id'))
-              ->pluck('name', 'id');
-      
-          return response()->json($cities);
-      }
-      public function village(Request $request)
-      {
-          $cities = Kelurahan::where('district_id', $request->get('id'))
-              ->pluck('name', 'id');
-      
-          return response()->json($cities);
-      }
+     
 }

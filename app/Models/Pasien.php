@@ -17,7 +17,8 @@ class Pasien extends Model
 
     protected $dates = ['deleted_at'];
     protected $fillable = [
-        'nik','no_mkcare','no_jkn','nama','alamat','kabupaten_id', 'kecamatan_id', 'kelurahan_id','jenis_kelamin','tempat_lahir','tanggal_lahir','nomor_wa','nomor_hp'
+        'nik','no_mkcare','no_jkn','nama','alamat','email','provinsi_id','kabupaten_id', 'kecamatan_id', 'kelurahan_id','jenis_kelamin',
+        'tempat_lahir','tanggal_lahir','nomor_wa','nomor_hp','id_user'
     ];
 
     
@@ -41,5 +42,20 @@ class Pasien extends Model
         }
     }
      
+    
+    public function kabupaten()
+    {
+        return $this->belongsTo('App\Models\Regency','kabupaten_id');
+    }
+
+    public function kecamatan()
+    {
+        return $this->belongsTo('App\Models\District','kecamatan_id');
+    }
+
+    public function kelurahan()
+    {
+        return $this->belongsTo('App\Models\Village','kelurahan_id');
+    }
 
 }
